@@ -87,7 +87,7 @@ class FibonacciMethod
 
     static void Main(string[] args)
     {
-        double a = 1; 
+        double a = -1; 
         double b = 3;
         double l = 0.3;
         double e = 0.3;
