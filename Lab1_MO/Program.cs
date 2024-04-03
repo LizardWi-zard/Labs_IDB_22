@@ -2,26 +2,26 @@
 {
     class GoldenSectionSearch
     {
-        static double GoldenRatio = (3 - Math.Sqrt(5)) / 2; // Значение золотого сечения
+        static double GoldenRatio = (3 - Math.Sqrt(5)) / 2;
 
-        static double Function(double x)
+        static double F(double x)
         {
-            // Здесь нужно реализовать вашу функцию
-
-            var v = 2 * x * x * x + 9 * x * x - 21; //2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
-
-            return v; // Пример: квадратичная функция
+            return 2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
         }
 
-        static double GoldenSectionSearchMin(double a, double b, double epsilon)
+        static double GoldenSectionSearchMin(double a, double b, double e)
         {
-            double y = a + GoldenRatio * (b - a);
-            double z = a + b - y;
+            var k = 0;
 
-            double fy = Function(y);
-            double fz = Function(z);
+            var y = a + GoldenRatio * (b - a);
+            var z = a + b - y;
 
-            while (Math.Abs(a - b) > epsilon)
+            var fy = F(y);
+            var fz = F(z);
+
+            Output(k, a, b, y, z, fy, fz);
+
+            while (Math.Abs(a - b) > e)
             {
                 if (fy <= fz)
                 {
@@ -31,7 +31,7 @@
                     y = a + b - y;
                     fz = fy;
 
-                    fy = Function(y);
+                    fy = F(y);
                 }
                 else
                 {
@@ -40,17 +40,12 @@
                     y = z;
                     z = a + b - z;
                     fy = fz;
-                    fz = Function(z);
+                    fz = F(z);
                 }
 
-                Console.WriteLine(a.ToString() + "\n" +
-                                  b.ToString() + "\n" +
-                                  z.ToString() + "\n" +
-                                  y.ToString() + "\n" +
-                                  fy.ToString() + "\n" +
-                                  fz.ToString() + "\n");
+                k++;
 
-
+                Output(k, a, b, y, z, fy, fz);
             }
 
             return (a + b) / 2;
@@ -58,20 +53,27 @@
 
         static void Main(string[] args)
         {
-            double a = 0; // Начальная левая граница интервала
-            a = Convert.ToDouble(Console.ReadLine());
-            
-            double b = 1; // Начальная правая граница интервала
-            b = Convert.ToDouble(Console.ReadLine());
-            
-            double epsilon = 0.0001; // Требуемая точность
+            double a = -1; // Начальная левая граница интервала
+            double b = 3; // Начальная правая граница интервала
 
-            double min = GoldenSectionSearchMin(a, b, epsilon);
+            double e = 0.3; 
 
-            Console.WriteLine($"Минимум функции на интервале [{a}, {b}] с точностью {epsilon} равен {min}");
+            double min = GoldenSectionSearchMin(a, b, e);
 
-            Console.WriteLine(Function(min));
+            Console.WriteLine($"Минимум функции на интервале [{a}, {b}] с точностью {e} равен {min}");
+
+            Console.WriteLine("Значение функции по найденному минимуму: " + F(min));
         }
-    }
 
+        static void Output(int k, double a, double b, double y, double z, double fy, double fz)
+        {
+            Console.WriteLine($"\niteration {k}:");
+            Console.WriteLine("a:" + Math.Round(a, 6) + "\n" +
+                              "b:" + Math.Round(b, 6) + "\n" +
+                              "y:" + Math.Round(y, 6) + "\n" +
+                              "z:" + Math.Round(z, 6) + "\n" +
+                              "fy:" + Math.Round(fy, 6) + "\n" +
+                              "fz:" + Math.Round(fz, 6) + "\n");
+        }
+    }                                                 
 }
