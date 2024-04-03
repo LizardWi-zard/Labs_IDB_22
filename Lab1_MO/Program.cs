@@ -2,39 +2,40 @@
 
 class FibonacciMethod
 {
-    static double Function(double x)
-    {
-        var v = 2 * x * x * x + 9 * x * x - 21; //2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
-
-        return v; // Пример: квадратичная функция
-    }
+    static double F(double x) => Math.Pow(x, 3) + 3 * Math.Pow(x, 2) - 24 * x + 10;
 
     static int Fibonacci(int n)
     {
         if (n <= 1)
+        {
             return n;
+        }
+
         return Fibonacci(n - 1) + Fibonacci(n - 2);
     }
 
     static int FindN(double a, double b, double l)
     {
-        double length = b - a;
-        int N = 0;
+        var length = b - a;
+        var N = 0;
+
         while (Fibonacci(N) < length / l)
             N++;
         return N;
     }
 
-    static double FibonacciSearch(double a, double b, double epsilon)
+    static double FibonacciSearch(double a, double b, double e)
     {
-        int N = FindN(a, b, epsilon);
-        int k = 0;
+        var N = FindN(a, b, e);
+        var k = 0;
 
-        double y = a + (double)Fibonacci(N - 2) / Fibonacci(N) * (b - a);
-        double z = a + (double)Fibonacci(N - 1) / Fibonacci(N) * (b - a);
+        var y = a + (double)Fibonacci(N - 2) / Fibonacci(N) * (b - a);
+        var z = a + (double)Fibonacci(N - 1) / Fibonacci(N) * (b - a);
 
-        double fy = Function(y);
-        double fz = Function(z);
+        var fy = F(y);
+        var fz = F(z);
+
+        Output(k, N, a, b, y, z, fy, fz);
 
         while (k != N - 3)
         {
@@ -44,7 +45,7 @@ class FibonacciMethod
                 z = y;
                 y = a + (double)Fibonacci(N - k - 3) / Fibonacci(N - k - 1) * (b - a);
                 fz = fy;
-                fy = Function(y);
+                fy = F(y);
             }
             else
             {
@@ -52,30 +53,25 @@ class FibonacciMethod
                 y = z;
                 z = a + (double)Fibonacci(N - k - 2) / Fibonacci(N - k - 1) * (b - a);
                 fy = fz;
-                fz = Function(z);
+                fz = F(z);
             }
+
             k++;
 
-            Console.WriteLine(a.ToString() + "\n" +
-                                  b.ToString() + "\n" +
-                                  z.ToString() + "\n" +
-                                  y.ToString() + "\n" +
-                                  fy.ToString() + "\n" +
-                                  fz.ToString() + "\n");
+            Output(k, N, a, b, y, z, fy, fz);
         }
 
-        // Final N-th function evaluation
-        double yN = (a + b) / 2;
-        double zN = yN;
+        var yN = (a + b) / 2;
+        var zN = yN;
 
         if (k == N - 3)
         {
             yN = zN = (a + b) / 2;
-            zN = yN + epsilon;
+            zN = yN + e;
         }
 
-        double fyN = Function(yN);
-        double fzN = Function(zN);
+        var fyN = F(yN);
+        var fzN = F(zN);
 
         if (fyN <= fzN)
         {
@@ -91,14 +87,26 @@ class FibonacciMethod
 
     static void Main(string[] args)
     {
-        double a = -1; // Левая граница интервала
-        double b = 3; // Правая граница интервала
-        double l = 0.3; // Допустимая длина конечного интервала
-        double epsilon = 0.3; // Константа различимости
+        double a = 1; 
+        double b = 3;
+        double l = 0.3;
+        double e = 0.3;
 
         double min = FibonacciSearch(a, b, l);
 
-        Console.WriteLine($"Минимум функции на интервале [{a}, {b}] с длиной интервала {l} и константой различимости {epsilon} равен {min}");
-        Console.WriteLine(Function(min));
+        Console.WriteLine($"Минимум функции на интервале [{a}, {b}] с длиной интервала {l} и константой различимости {e} равен {min}");
+        Console.WriteLine("Значение функции в найденной точки:" + F(min));
+    }
+
+    static void Output(int k, int N, double a, double b, double y, double z, double fy, double fz)
+    {
+        Console.WriteLine($"\niteration {k}:");
+        Console.WriteLine("a: " + Math.Round(a, 6) + "\n" +
+                          "b: " + Math.Round(b, 6) + "\n" +
+                          "N: " + N + "\n" +
+                          "y: " + Math.Round(y, 6) + "\n" +
+                          "z: " + Math.Round(z, 6) + "\n" +
+                          "fy: " + Math.Round(fy, 6) + "\n" +
+                          "fz: " + Math.Round(fz, 6) + "\n");
     }
 }
