@@ -4,10 +4,7 @@
     {
         static double GoldenRatio = (3 - Math.Sqrt(5)) / 2;
 
-        static double F(double x)
-        {
-            return 2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
-        }
+        static double F(double x) => 2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
 
         static double GoldenSectionSearchMin(double a, double b, double e)
         {
