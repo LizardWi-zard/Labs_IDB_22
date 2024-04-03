@@ -1,77 +1,75 @@
-﻿namespace Lab1_MO
+﻿using System;
+
+class BisectionMethod
 {
-    class GoldenSectionSearch
+    static double Function(double x)
     {
-        static double GoldenRatio = (3 - Math.Sqrt(5)) / 2; // Значение золотого сечения
+        var v = 2 * x * x * x + 9 * x * x - 21; //2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
 
-        static double Function(double x)
+        return v; // Пример: квадратичная функция
+    }
+
+    static double Bisection(double a, double b, double epsilon)
+    {
+        double fa = Function(a);
+        double fb = Function(b);
+
+        if (fa * fb >= 0)
         {
-            // Здесь нужно реализовать вашу функцию
-
-            var v = 2 * x * x * x + 9 * x * x - 21; //2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
-
-            return v; // Пример: квадратичная функция
+            throw new ArgumentException("Функция должна иметь разные знаки на концах интервала [a, b]");
         }
 
-        static double GoldenSectionSearchMin(double a, double b, double epsilon)
+        while ((b - a) > epsilon)
         {
-            double y = a + GoldenRatio * (b - a);
-            double z = a + b - y;
+            double xc = (a + b) / 2; // Средняя точка интервала
+            double halfLength = (b - a) / 2; // Длина половины интервала
 
-            double fy = Function(y);
-            double fz = Function(z);
+            double yc = a + halfLength / 4; // Точка y
+            double zc = b - halfLength / 4; // Точка z
 
-            while (Math.Abs(a - b) > epsilon)
+            double fc = Function(xc);
+            double fy = Function(yc);
+            double fz = Function(zc);
+
+            if (fy < fc)
             {
-                if (fy <= fz)
+                b = xc;
+                xc = yc;
+            }
+            else
+            {
+                if (fz < fc)
                 {
-                    a = a;
-                    b = z;
-                    z = y;
-                    y = a + b - y;
-                    fz = fy;
-
-                    fy = Function(y);
+                    a = xc;
+                    xc = zc;
                 }
                 else
                 {
-                    a = y;
-                    b = b;
-                    y = z;
-                    z = a + b - z;
-                    fy = fz;
-                    fz = Function(z);
+                    a = yc;
+                    b = zc;
                 }
-
-                Console.WriteLine(a.ToString() + "\n" +
-                                  b.ToString() + "\n" +
-                                  z.ToString() + "\n" +
-                                  y.ToString() + "\n" +
-                                  fy.ToString() + "\n" +
-                                  fz.ToString() + "\n");
-
-
             }
-
-            return (a + b) / 2;
         }
 
-        static void Main(string[] args)
-        {
-            double a = 0; // Начальная левая граница интервала
-            a = Convert.ToDouble(Console.ReadLine());
-            
-            double b = 1; // Начальная правая граница интервала
-            b = Convert.ToDouble(Console.ReadLine());
-            
-            double epsilon = 0.0001; // Требуемая точность
-
-            double min = GoldenSectionSearchMin(a, b, epsilon);
-
-            Console.WriteLine($"Минимум функции на интервале [{a}, {b}] с точностью {epsilon} равен {min}");
-
-            Console.WriteLine(Function(min));
-        }
+        return (a + b) / 2;
     }
 
+    static void Main(string[] args)
+    {
+        double a = -1; // Левая граница интервала
+        double b = 3; // Правая граница интервала
+        double epsilon = 0.3; // Требуемая точность
+
+        try
+        {
+            double root = Bisection(a, b, epsilon);
+            Console.WriteLine($"Корень функции на интервале [{a}, {b}] с точностью {epsilon} равен {root}");
+
+            Console.WriteLine(Function(root));
+        }
+        catch (ArgumentException e)
+        {
+            Console.WriteLine($"Ошибка: {e.Message}");
+        }
+    }
 }
