@@ -2,21 +2,29 @@
 
 class BisectionMethod
 {
-    static double F(double x) =>  2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
+    static double F(double x) =>  3 * x + 6;  // 2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
 
     static double Bisection(double a, double b, double e)
     {
         var k = 0;
 
+        var x_c = 0.0;
+        var halfLength = 0.0;
+        var y_c = 0.0;
+        var z_c = 0.0;
+        var f_c = 0.0;
+        var f_y = 0.0;
+        var f_z = 0.0;
+
         do
         {
-            var x_c = (a + b) / 2;
-            var halfLength = (b - a) / 2;
-            var y_c = a + halfLength / 4;
-            var z_c = b - halfLength / 4;
-            var f_c = F(x_c);
-            var f_y = F(y_c);
-            var f_z = F(z_c);
+            x_c = (a + b) / 2;
+            halfLength = (b - a) / 2;
+            y_c = a + halfLength / 4;
+            z_c = b - halfLength / 4;
+            f_c = F(x_c);
+            f_y = F(y_c);
+            f_z = F(z_c);
 
             Output(k, a, b, x_c, y_c, z_c, f_c, f_y, f_z);
 
