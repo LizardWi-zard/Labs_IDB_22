@@ -30,7 +30,7 @@ class BisectionMethod
 
             if (f_y < f_c)
             {
-                Console.WriteLine("f_y < f_c");
+                Console.WriteLine("f(y) < f(c)");
 
                 b = x_c;
                 x_c = y_c;
@@ -38,17 +38,17 @@ class BisectionMethod
             else
             {
 
-                Console.WriteLine("f_y < f_c");
+                Console.WriteLine("f(y) < f(c)");
 
                 if (f_z < f_c)
                 {
-                    Console.WriteLine("f_z < f_c");
+                    Console.WriteLine("f(z) < f(c)");
                     a = x_c;
                     x_c = z_c;
                 }
                 else
                 {
-                    Console.WriteLine("f_y > f_c");
+                    Console.WriteLine("f(y) > f(c)");
                     a = y_c;
                     b = z_c;
                 }
