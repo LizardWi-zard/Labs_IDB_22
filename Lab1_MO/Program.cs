@@ -50,8 +50,8 @@
 
         static void Main(string[] args)
         {
-            double a = -1; // Начальная левая граница интервала
-            double b = 3; // Начальная правая граница интервала
+            double a = -1;
+            double b = 3;
 
             double e = 0.3; 
 
