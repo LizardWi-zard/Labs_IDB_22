@@ -22,6 +22,7 @@
             {
                 if (f_y <= f_z)
                 {
+                    Console.WriteLine("f(y) <= f(z)");
                     a = a;
                     b = z;
                     z = y;
@@ -32,6 +33,7 @@
                 }
                 else
                 {
+                    Console.WriteLine("f(y) > f(z)");
                     a = y;
                     b = b;
                     y = z;
@@ -65,12 +67,12 @@
         static void Output(int k, double a, double b, double y, double z, double f_y, double f_z)
         {
             Console.WriteLine($"\nитерация {k}:");
-            Console.WriteLine("a:" + Math.Round(a, 6) + "\n" +
-                              "b:" + Math.Round(b, 6) + "\n" +
-                              "y:" + Math.Round(y, 6) + "\n" +
-                              "z:" + Math.Round(z, 6) + "\n" +
-                              "f_y:" + Math.Round(f_y, 6) + "\n" +
-                              "f_z:" + Math.Round(f_z, 6) + "\n");
+            Console.WriteLine("a: " + Math.Round(a, 6) + "\n" +
+                              "b: " + Math.Round(b, 6) + "\n" +
+                              "y: " + Math.Round(y, 6) + "\n" +
+                              "z: " + Math.Round(z, 6) + "\n" +
+                              "f(y): " + Math.Round(f_y, 6) + "\n" +
+                              "f(z): " + Math.Round(f_z, 6) + "");
         }
     }                                                 
 }
