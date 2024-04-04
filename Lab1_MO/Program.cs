@@ -7,42 +7,41 @@ class BisectionMethod
     static double Bisection(double a, double b, double e)
     {
         var k = 0;
-       
-        while ((b - a) > e)
+
+        do
         {
-            var xc = (a + b) / 2; 
+            var x_c = (a + b) / 2;
             var halfLength = (b - a) / 2;
-            var yc = a + halfLength / 4; 
-            var zc = b - halfLength / 4; 
-            var fc = F(xc);
-            var fy = F(yc);
-            var fz = F(zc);
+            var y_c = a + halfLength / 4;
+            var z_c = b - halfLength / 4;
+            var f_c = F(x_c);
+            var f_y = F(y_c);
+            var f_z = F(z_c);
 
-            Output(k, a, b, xc, halfLength, yc, zc, fc, fy, fz);
+            Output(k, a, b, x_c, y_c, z_c, f_c, f_y, f_z);
 
-            if (fy < fc)
+            if (f_y < f_c)
             {
-                b = xc;
-                xc = yc;
+                b = x_c;
+                x_c = y_c;
             }
             else
             {
-                if (fz < fc)
+                if (f_z < f_c)
                 {
-                    a = xc;
-                    xc = zc;
+                    a = x_c;
+                    x_c = z_c;
                 }
                 else
                 {
-                    a = yc;
-                    b = zc;
+                    a = y_c;
+                    b = z_c;
                 }
             }
 
             k++;
 
-            Output(k, a, b, xc, halfLength, yc, zc, fc,fy,fz);
-        }
+        } while ((b - a) > e);
 
         return (a + b) / 2;
     }
@@ -59,17 +58,16 @@ class BisectionMethod
         Console.WriteLine($"Значение функции в {root}: " + Math.Round(F(root), 6));
     }
 
-    static void Output(int k, double a, double b, double xc, double halfLength, double yc, double zc, double fc, double fy, double fz)
+    static void Output(int k, double a, double b, double x_c, double y_c, double z_c, double f_c, double f_y, double f_z)
     {
-        Console.WriteLine($"\niteration {k}:");
+        Console.WriteLine($"\nитерация {k}:");
         Console.WriteLine("a: " + Math.Round(a, 6) + "\n" +
                           "b: " + Math.Round(b, 6) + "\n" +
-                         "xc: " + Math.Round(xc, 6) + "\n" +
-                          "halfLength: " + Math.Round(halfLength, 6) + "\n" +
-                          "yc: " + Math.Round(yc, 6) + "\n" +
-                          "zc: " + Math.Round(zc, 6) + "\n" +
-                          "fc: " + Math.Round(fc, 6) + "\n" +
-                          "fy: " + Math.Round(fy, 6) + "\n" +
-                          "fz: " + Math.Round(fz, 6) + "\n");
+                          "x_c: " + Math.Round(x_c, 6) + "\n" +
+                          "f_c: " + Math.Round(f_c, 6) + "\n" +
+                          "y_c: " + Math.Round(y_c, 6) + "\n" +
+                          "f_y: " + Math.Round(f_y, 6) + "\n" +
+                          "z_c: " + Math.Round(z_c, 6) + "\n" +
+                          "f_z: " + Math.Round(f_z, 6) + "\n");
     }
 }
