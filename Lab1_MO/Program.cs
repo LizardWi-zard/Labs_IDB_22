@@ -2,11 +2,12 @@
 
 class BisectionMethod
 {
-    static double F(double x) =>  3 * x + 6;  // 2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
+    static double F(double x) =>  2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
 
-    static double Bisection(double a, double b, double e)
+    static double Bisection(double a, double b, double e, out int k)
     {
-        var k = 0;
+
+        k = 0;
 
         var x_c = 0.0;
         var halfLength = 0.0;
@@ -56,7 +57,7 @@ class BisectionMethod
 
             k++;
 
-        } while ((b - a) > e);
+        } while (Math.Abs(b - a) > e);
 
         return (a + b) / 2;
     }
@@ -66,10 +67,13 @@ class BisectionMethod
         double a = -1;
         double b = 3; 
         double e = 0.3;
-        
-        double root = Math.Round(Bisection(a, b, e), 6);
 
-        Console.WriteLine($"Корень функции на интервале [{a}, {b}] с точностью {e} равен {root}");
+        int k = 0;
+        
+        double root = Math.Round(Bisection(a, b, e, out k), 6);
+
+        Console.WriteLine($"Функции на интервале [{a}, {b}] с точностью {e} равна {root}");
+        Console.WriteLine($"количество итераций: {k}");
         Console.WriteLine($"Значение функции в {root}: " + Math.Round(F(root), 6));
     }
 
