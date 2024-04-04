@@ -2,7 +2,7 @@
 
 class FibonacciMethod
 {
-    static double F(double x) => Math.Pow(x, 3) + 3 * Math.Pow(x, 2) - 24 * x + 10;
+    static double F(double x) => 2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
 
     static int Fibonacci(int n)
     {
