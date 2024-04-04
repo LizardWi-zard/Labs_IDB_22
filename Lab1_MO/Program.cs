@@ -6,29 +6,29 @@
 
         static double F(double x) => 2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
 
-        static double GoldenSectionSearchMin(double a, double b, double e)
+        static double GoldenSearch(double a, double b, double e)
         {
             var k = 0;
 
             var y = a + GoldenRatio * (b - a);
             var z = a + b - y;
 
-            var fy = F(y);
-            var fz = F(z);
+            var f_y = F(y);
+            var f_z = F(z);
 
-            Output(k, a, b, y, z, fy, fz);
+            Output(k, a, b, y, z, f_y, f_z);
 
             while (Math.Abs(a - b) > e)
             {
-                if (fy <= fz)
+                if (f_y <= f_z)
                 {
                     a = a;
                     b = z;
                     z = y;
                     y = a + b - y;
-                    fz = fy;
+                    f_z = f_y;
 
-                    fy = F(y);
+                    f_y = F(y);
                 }
                 else
                 {
@@ -36,13 +36,13 @@
                     b = b;
                     y = z;
                     z = a + b - z;
-                    fy = fz;
-                    fz = F(z);
+                    f_y = f_z;
+                    f_z = F(z);
                 }
 
                 k++;
 
-                Output(k, a, b, y, z, fy, fz);
+                Output(k, a, b, y, z, f_y, f_z);
             }
 
             return (a + b) / 2;
@@ -55,22 +55,22 @@
 
             double e = 0.3; 
 
-            double min = GoldenSectionSearchMin(a, b, e);
+            double min = GoldenSearch(a, b, e);
 
             Console.WriteLine($"Минимум функции на интервале [{a}, {b}] с точностью {e} равен {min}");
 
             Console.WriteLine("Значение функции по найденному минимуму: " + F(min));
         }
 
-        static void Output(int k, double a, double b, double y, double z, double fy, double fz)
+        static void Output(int k, double a, double b, double y, double z, double f_y, double f_z)
         {
-            Console.WriteLine($"\niteration {k}:");
+            Console.WriteLine($"\nитерация {k}:");
             Console.WriteLine("a:" + Math.Round(a, 6) + "\n" +
                               "b:" + Math.Round(b, 6) + "\n" +
                               "y:" + Math.Round(y, 6) + "\n" +
                               "z:" + Math.Round(z, 6) + "\n" +
-                              "fy:" + Math.Round(fy, 6) + "\n" +
-                              "fz:" + Math.Round(fz, 6) + "\n");
+                              "f_y:" + Math.Round(f_y, 6) + "\n" +
+                              "f_z:" + Math.Round(f_z, 6) + "\n");
         }
     }                                                 
 }
