@@ -6,9 +6,7 @@ class BisectionMethod
 
     static double Bisection(double a, double b, double e, out int k)
     {
-
         k = 0;
-
         var x_c = 0.0;
         var halfLength = 0.0;
         var y_c = 0.0;
@@ -39,7 +37,7 @@ class BisectionMethod
             else
             {
 
-                Console.WriteLine("f(y) < f(c)");
+                Console.WriteLine("f(y) > f(c)");
 
                 if (f_z < f_c)
                 {
@@ -49,7 +47,7 @@ class BisectionMethod
                 }
                 else
                 {
-                    Console.WriteLine("f(y) > f(c)");
+                    Console.WriteLine("f(z) > f(c)");
                     a = y_c;
                     b = z_c;
                 }
@@ -72,21 +70,21 @@ class BisectionMethod
         
         double root = Math.Round(Bisection(a, b, e, out k), 6);
 
-        Console.WriteLine($"Функции на интервале [{a}, {b}] с точностью {e} равна {root}");
+        Console.WriteLine($"Функции на интервале [{a}, {b}] с точностью {e} равна {Math.Round(root, 4)}");
         Console.WriteLine($"количество итераций: {k}");
-        Console.WriteLine($"Значение функции в {root}: " + Math.Round(F(root), 6));
+        Console.WriteLine($"Значение функции в {Math.Round(root, 4)}: " + Math.Round(F(root), 4));
     }
 
     static void Output(int k, double a, double b, double x_c, double y_c, double z_c, double f_c, double f_y, double f_z)
     {
         Console.WriteLine($"\nитерация {k}:");
-        Console.WriteLine("a: " + Math.Round(a, 6) + "\n" +
-                          "b: " + Math.Round(b, 6) + "\n" +
-                          "x_c: " + Math.Round(x_c, 6) + "\n" +
-                          "f_c: " + Math.Round(f_c, 6) + "\n" +
-                          "y_c: " + Math.Round(y_c, 6) + "\n" +
-                          "f_y: " + Math.Round(f_y, 6) + "\n" +
-                          "z_c: " + Math.Round(z_c, 6) + "\n" +
-                          "f_z: " + Math.Round(f_z, 6) + "");
+        Console.WriteLine("a: " + Math.Round(a, 4) + "\n" +
+                          "b: " + Math.Round(b, 4) + "\n" +
+                          "x_c: " + Math.Round(x_c, 4) + "\n" +
+                          "f_c: " + Math.Round(f_c, 4) + "\n" +
+                          "y_c: " + Math.Round(y_c, 4) + "\n" +
+                          "f_y: " + Math.Round(f_y, 4) + "\n" +
+                          "z_c: " + Math.Round(z_c, 4) + "\n" +
+                          "f_z: " + Math.Round(f_z, 4) + "");
     }
 }
