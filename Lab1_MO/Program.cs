@@ -21,8 +21,8 @@ class BisectionMethod
         {
             x_c = (a + b) / 2;
             halfLength = (b - a) / 2;
-            y_c = a + halfLength / 4;
-            z_c = b - halfLength / 4;
+            y_c = a + halfLength / 2;
+            z_c = b - halfLength / 2;
             f_c = F(x_c);
             f_y = F(y_c);
             f_z = F(z_c);
