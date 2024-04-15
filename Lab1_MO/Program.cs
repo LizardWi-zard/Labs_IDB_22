@@ -2,99 +2,101 @@
 
 class GradientDescent
 {
-    // Определяем функцию, для которой ищем минимум
+    // Функция, чьи минимум мы ищем
     static double Function(double[] x)
     {
-        // Функция f(x) = 6 * x1^2 + 0.4 * x1 * x2 + 5 * x2^2
+        // f(x) = 6 * x1^2 + 0.4 * x1 * x2 + 5 * x2^2
         return 6 * x[0] * x[0] + 0.4 * x[0] * x[1] + 5 * x[1] * x[1];
     }
 
-    // Вычисление градиента функции в точке x
+    // Градиент функции
     static double[] Gradient(double[] x)
     {
-        // Градиент функции f(x) = 6 * x1^2 + 0.4 * x1 * x2 + 5 * x2^2
-        double df_dx1 = 12 * x[0] + 0.4 * x[1];
-        double df_dx2 = 0.4 * x[0] + 10 * x[1];
+        // Производные по каждой переменной
+        double df_dx1 = Math.Round(12 * x[0] + 0.4 * x[1], 4);
+        double df_dx2 = Math.Round(0.4 * x[0] + 10 * x[1], 4);
+
         return new double[] { df_dx1, df_dx2 };
     }
 
-    // Метод для выполнения градиентного спуска
-    static double[] GradientDescentAlgorithm(double[] x, double E, double E1, double E2, int M)
+    // Метод градиентного спуска
+    static double[] GradientDescentMethod(double[] x, double E1, double E2, int M)
     {
-        double[] gradient = new double[x.Length];
-
-        for (int k = 0; k < M; k++)
+        int k = 0;
+        while (true)
         {
-            gradient = Gradient(x); // Шаг 3
+            // Шаг 3: Вычислить градиент функции
+            double[] gradient = Gradient(x);
 
-            // Вывод текущей итерации
-            Console.WriteLine($"Итерация {k + 1}:");
-            Console.WriteLine($"Текущие значения переменных: x = [{x[0]}; {x[1]}]");
-            Console.WriteLine($"Градиент: ∇f(x) = [{gradient[0]}; {gradient[1]}]");
-
-            // Шаг 4
-            if (Math.Sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1]) < E)
+            // Шаг 4: Проверить выполнение критерия окончания
+            if (Norm(gradient) < E1)
             {
-                Console.WriteLine("Критерий выполнен");
+                Console.WriteLine("Критерий окончания выполнен.");
                 break;
             }
 
-            // Шаг 5
-            if (k >= M - 1)
+            // Шаг 5: Проверить выполнение предельного числа итераций
+            if (k >= M)
             {
-                Console.WriteLine("Достигнуто предельное число итераций");
+                Console.WriteLine("Достигнуто предельное число итераций.");
                 break;
             }
 
-            // Шаг 6 (можно выбрать различные стратегии выбора величины шага t_k)
-            double t_k = 0.1;
+            // Шаг 6: Вычислить величину шага
+            double step = ComputeStep(x, gradient);
 
-            // Шаг 7
+            // Шаг 7: Вычислить новое значение x
             double[] newX = new double[x.Length];
             for (int i = 0; i < x.Length; i++)
             {
-                newX[i] = Math.Round(x[i] - t_k * gradient[i], 4);
+                newX[i] = Math.Round(x[i] - step * gradient[i], 4);
             }
 
-            // Вывод измененных переменных
-            Console.WriteLine($"Новые значения переменных: x = [{newX[0]}, {newX[1]}]");
+            // Вывод текущей итерации
+            Console.WriteLine($"Итерация {k + 1}: x = ({Math.Round(x[0], 4)}, {Math.Round(x[1],4)}), f(x) = {Math.Round(Function(x), 4)}");
 
-            // Шаг 8
-            if (Function(newX) - Function(x) < 0)
+            // Шаг 8: Проверить выполнение условия остановки
+            if (Norm(newX) - Norm(x) < E2 && Math.Abs(Function(newX) - Function(x)) < E2)
             {
-                // Шаг 9
-                if (Math.Sqrt(newX[0] * newX[0] + newX[1] * newX[1]) < E2 &&
-                    Math.Abs(Function(newX) - Function(x)) < E2)
-                {
-                    Console.WriteLine("Расчет окончен");
-                    return newX;
-                }
-                else
-                {
-                    x = newX;
-                    continue;
-                }
+                Console.WriteLine("Условие остановки выполнено.");
+                break;
             }
-            else
-            {
-                t_k /= 2;
-                continue;
-            }
+
+            x = newX;
+            k++;
         }
 
         return x;
     }
 
-    static void Main()
+    // Шаг 6: Вычислить величину шага
+    static double ComputeStep(double[] x, double[] gradient)
     {
-        double E = 0.3; // Погрешность
-        double E1 = 0.15; // Погрешность 1
-        double E2 = 0.2; // Погрешность 2
+        // В данном примере используем постоянный шаг
+        return 0.01;
+    }
+
+    static double Norm(double[] vector)
+    {
+        double sum = 0;
+        for (int i = 0; i < vector.Length; i++)
+        {
+            sum += vector[i] * vector[i];
+        }
+        return Math.Sqrt(sum);
+    }
+
+    static void Main(string[] args)
+    {
+        double[] x = { 0, 0.5 }; // Начальное значение x
+        double E1 = 0.15; // Погрешность для критерия окончания
+        double E2 = 0.2; // Погрешность для условия остановки
         int M = 10; // Предельное число итераций
 
-        double[] x = new double[] { 0, 0.5 }; // Начальная точка
+        // Вызов метода градиентного спуска с выводом
+        double[] result = GradientDescentMethod(x, E1, E2, M);
 
-        double[] result = GradientDescentAlgorithm(x, E, E1, E2, M);
-        Console.WriteLine($"Минимум функции: f({result[0]}, {result[1]}) = {Function(result)}");
+        Console.WriteLine("Минимум функции: " + Function(result));
+        Console.WriteLine("При x = (" + result[0] + ", " + result[1] + ")");
     }
 }
