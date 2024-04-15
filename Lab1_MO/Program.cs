@@ -1,90 +1,100 @@
 ﻿using System;
 
-class BisectionMethod
+class GradientDescent
 {
-    static double F(double x) =>  2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
-
-    static double Bisection(double a, double b, double e, out int k)
+    // Определяем функцию, для которой ищем минимум
+    static double Function(double[] x)
     {
-        k = 0;
-        var x_c = 0.0;
-        var halfLength = 0.0;
-        var y_c = 0.0;
-        var z_c = 0.0;
-        var f_c = 0.0;
-        var f_y = 0.0;
-        var f_z = 0.0;
+        // Функция f(x) = 6 * x1^2 + 0.4 * x1 * x2 + 5 * x2^2
+        return 6 * x[0] * x[0] + 0.4 * x[0] * x[1] + 5 * x[1] * x[1];
+    }
 
-        do
+    // Вычисление градиента функции в точке x
+    static double[] Gradient(double[] x)
+    {
+        // Градиент функции f(x) = 6 * x1^2 + 0.4 * x1 * x2 + 5 * x2^2
+        double df_dx1 = 12 * x[0] + 0.4 * x[1];
+        double df_dx2 = 0.4 * x[0] + 10 * x[1];
+        return new double[] { df_dx1, df_dx2 };
+    }
+
+    // Метод для выполнения градиентного спуска
+    static double[] GradientDescentAlgorithm(double[] x, double E, double E1, double E2, int M)
+    {
+        double[] gradient = new double[x.Length];
+
+        for (int k = 0; k < M; k++)
         {
-            x_c = (a + b) / 2;
-            halfLength = (b - a) / 2;
-            y_c = a + halfLength / 2;
-            z_c = b - halfLength / 2;
-            f_c = F(x_c);
-            f_y = F(y_c);
-            f_z = F(z_c);
+            gradient = Gradient(x); // Шаг 3
 
-            Output(k, a, b, x_c, y_c, z_c, f_c, f_y, f_z);
+            // Вывод текущей итерации
+            Console.WriteLine($"Итерация {k + 1}:");
+            Console.WriteLine($"Текущие значения переменных: x = [{x[0]}; {x[1]}]");
+            Console.WriteLine($"Градиент: ∇f(x) = [{gradient[0]}; {gradient[1]}]");
 
-            if (f_y < f_c)
+            // Шаг 4
+            if (Math.Sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1]) < E)
             {
-                Console.WriteLine("f(y) < f(c)");
-
-                b = x_c;
-                x_c = y_c;
+                Console.WriteLine("Критерий выполнен");
+                break;
             }
-            else
+
+            // Шаг 5
+            if (k >= M - 1)
             {
+                Console.WriteLine("Достигнуто предельное число итераций");
+                break;
+            }
 
-                Console.WriteLine("f(y) > f(c)");
+            // Шаг 6 (можно выбрать различные стратегии выбора величины шага t_k)
+            double t_k = 0.1;
 
-                if (f_z < f_c)
+            // Шаг 7
+            double[] newX = new double[x.Length];
+            for (int i = 0; i < x.Length; i++)
+            {
+                newX[i] = Math.Round(x[i] - t_k * gradient[i], 4);
+            }
+
+            // Вывод измененных переменных
+            Console.WriteLine($"Новые значения переменных: x = [{newX[0]}, {newX[1]}]");
+
+            // Шаг 8
+            if (Function(newX) - Function(x) < 0)
+            {
+                // Шаг 9
+                if (Math.Sqrt(newX[0] * newX[0] + newX[1] * newX[1]) < E2 &&
+                    Math.Abs(Function(newX) - Function(x)) < E2)
                 {
-                    Console.WriteLine("f(z) < f(c)");
-                    a = x_c;
-                    x_c = z_c;
+                    Console.WriteLine("Расчет окончен");
+                    return newX;
                 }
                 else
                 {
-                    Console.WriteLine("f(z) > f(c)");
-                    a = y_c;
-                    b = z_c;
+                    x = newX;
+                    continue;
                 }
             }
+            else
+            {
+                t_k /= 2;
+                continue;
+            }
+        }
 
-            k++;
-
-        } while (Math.Abs(b - a) > e);
-
-        return (a + b) / 2;
+        return x;
     }
 
-    static void Main(string[] args)
+    static void Main()
     {
-        double a = -1;
-        double b = 3; 
-        double e = 0.3;
+        double E = 0.3; // Погрешность
+        double E1 = 0.15; // Погрешность 1
+        double E2 = 0.2; // Погрешность 2
+        int M = 10; // Предельное число итераций
 
-        int k = 0;
-        
-        double root = Math.Round(Bisection(a, b, e, out k), 6);
+        double[] x = new double[] { 0, 0.5 }; // Начальная точка
 
-        Console.WriteLine($"Функции на интервале [{a}, {b}] с точностью {e} равна {Math.Round(root, 4)}");
-        Console.WriteLine($"количество итераций: {k}");
-        Console.WriteLine($"Значение функции в {Math.Round(root, 4)}: " + Math.Round(F(root), 4));
-    }
-
-    static void Output(int k, double a, double b, double x_c, double y_c, double z_c, double f_c, double f_y, double f_z)
-    {
-        Console.WriteLine($"\nитерация {k}:");
-        Console.WriteLine("a: " + Math.Round(a, 4) + "\n" +
-                          "b: " + Math.Round(b, 4) + "\n" +
-                          "x_c: " + Math.Round(x_c, 4) + "\n" +
-                          "f_c: " + Math.Round(f_c, 4) + "\n" +
-                          "y_c: " + Math.Round(y_c, 4) + "\n" +
-                          "f_y: " + Math.Round(f_y, 4) + "\n" +
-                          "z_c: " + Math.Round(z_c, 4) + "\n" +
-                          "f_z: " + Math.Round(f_z, 4) + "");
+        double[] result = GradientDescentAlgorithm(x, E, E1, E2, M);
+        Console.WriteLine($"Минимум функции: f({result[0]}, {result[1]}) = {Function(result)}");
     }
 }
