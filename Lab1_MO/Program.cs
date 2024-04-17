@@ -1,103 +1,79 @@
 ﻿using System;
 
-class GradientDescent
+namespace LW2
 {
-    // Определяем функцию, для которой ищем минимум
-    static double Function(double[] x)
+    internal class Program
     {
-        //   7: f(x) = 6 * x1^2 + 0.4 * x1 * x2 + 5 * x2^2 . 6 * x[0] * x[0] + 0.4 * x[0] * x[1] + 5 * x[1] * x[1]
-        //  11: f(x) = 5 * x1^2 + 0.6 * x1 * x2 + 2 * x2^2 . 5 * x[0] * x[0] + 0.6 * x[0] * x[1] + 2 * x[1] * x[1]
-        return  6 * x[0] * x[0] + 0.4 * x[0] * x[1] + 5 * x[1] * x[1];
-    }
-
-    // Градиент функции
-    static double[] Gradient(double[] x)
-    {
-        // Производные по каждой переменной
-        double df_dx1 = Math.Round(12 * x[0] + 0.4 * x[1], 4);//, 4);
-        double df_dx2 = Math.Round(0.4 * x[0] + 10 * x[1], 4);//, 4);
-        // 10 * x[0] + 0.6 * x[1]  . 12 * x[0] + 0.4 * x[1]
-        // 0.6 * x[0] + 4 * x[1]  . 0.4 * x[0] + 10 * x[1]
-        return new double[] { df_dx1, df_dx2 };
-    }
-
-    // Метод для выполнения градиентного спуска
-    static double[] GradientDescentAlgorithm(double[] x, double E, double E1, double E2, int M)
-    {
-        double[] gradient = new double[x.Length];
-
-        for (int k = 0; k < M; k++)
+        static (double, double) CalculateGradient((double, double) point) => (12 * point.Item1 + 0.4 * point.Item2, 0.4 * point.Item1 + 10 * point.Item2);
+        static double FunctionValue((double, double) point) => 6 * point.Item1 * point.Item1 + 0.4 * point.Item1 * point.Item2 + 5 * point.Item2 * point.Item2;
+        static double Norm((double, double) point) => (Math.Sqrt(Math.Pow(point.Item1, 2) + Math.Pow(point.Item2, 2)));
+      
+        static bool IsAlgorithmEnded((double, double) previousPoint, (double, double) currentPoint, (double, double) nextPoint, double epsilon)
         {
-            gradient = Gradient(x); // Шаг 3
+            var condition1 = Norm((nextPoint.Item1 - currentPoint.Item1, nextPoint.Item2 - currentPoint.Item2)) < epsilon && Math.Abs(FunctionValue(nextPoint) - FunctionValue(currentPoint)) < epsilon;
+            var condition2 = Norm((currentPoint.Item1 - previousPoint.Item1, currentPoint.Item2 - previousPoint.Item2)) < epsilon && Math.Abs(FunctionValue(currentPoint) - FunctionValue(previousPoint)) < epsilon;
+            return condition1 && condition2;
+        }
 
-            // Вывод текущей итерации
-            Console.WriteLine($"Итерация {k + 1}:");
-            Console.WriteLine($"Текущие значения переменных: x = [{x[0]}; {x[1]}]");
-            Console.WriteLine($"Градиент: ∇f(x) = [{gradient[0]}; {gradient[1]}]");
+        static void PrintIterationInfo(int iteration, (double, double) currentPoint, (double, double) gradient, double functionValue)
+        {
+            Console.WriteLine($"Iteration {iteration}:");
+            Console.WriteLine($"Current point: ({Math.Round(currentPoint.Item1, 4)}, {Math.Round(currentPoint.Item2, 4)})");
+            Console.WriteLine($"Gradient: ({Math.Round(gradient.Item1, 4)}, {Math.Round(gradient.Item2, 4)})");
+            Console.WriteLine($"Function value: {Math.Round(functionValue, 4)}");
+            Console.WriteLine();
+        }
 
-            // Шаг 4
-            if (Math.Sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1]) < E)
+        static ((double, double), int) ConstantStepGradientDescent((double, double) startingPoint, double epsilon, double epsilonGradient, double epsilonDifference, int maxIterations)
+        {
+            var previousPoint = (startingPoint.Item1, startingPoint.Item2);
+            var currentPoint = (startingPoint.Item1, startingPoint.Item2);
+            var nextPoint = (startingPoint.Item1, startingPoint.Item2);
+            double step;
+            int iteration = 0;
+
+            while (true)
             {
-                Console.WriteLine("Критерий выполнен");
-                break;
-            }
-
-            // Шаг 5
-            if (k >= M - 1)
-            {
-                Console.WriteLine("Достигнуто предельное число итераций");
-                break;
-            }
-
-            // Шаг 6 (можно выбрать различные стратегии выбора величины шага t_k)
-            double t_k = 0.1;
-
-            // Шаг 7
-            double[] newX = new double[x.Length];
-            for (int i = 0; i < x.Length; i++)
-            {
-                newX[i] = Math.Round(x[i] - t_k * gradient[i], 4);
-            }
-
-            // Вывод измененных переменных
-            Console.WriteLine($"Новые значения переменных: x = [{newX[0]}, {newX[1]}]");
-
-            // Шаг 8
-            if (Function(newX) - Function(x) < 0)
-            {
-                // Шаг 9
-                if (Math.Sqrt(newX[0] * newX[0] + newX[1] * newX[1]) < E2 &&
-                    Math.Abs(Function(newX) - Function(x)) < E2)
+                var currentGradient = CalculateGradient(currentPoint);
+                if (Norm(currentGradient) < epsilonGradient || iteration >= maxIterations)
                 {
-                    Console.WriteLine("Расчет окончен");
-                    return newX;
+                    return (currentPoint, iteration);
+                }
+
+                Console.WriteLine("Enter step:");
+                step = Double.Parse(Console.ReadLine());
+
+                while (FunctionValue(nextPoint) - FunctionValue(currentPoint) >= 0)
+                {
+                    nextPoint.Item1 = currentPoint.Item1 - step * currentGradient.Item1;
+                    nextPoint.Item2 = currentPoint.Item2 - step * currentGradient.Item2;
+                    step /= 2;
+                }
+
+                PrintIterationInfo(iteration, currentPoint, currentGradient, FunctionValue(currentPoint));
+
+                if (IsAlgorithmEnded(previousPoint, currentPoint, nextPoint, epsilonDifference))
+                {
+                    return (nextPoint, iteration);
                 }
                 else
                 {
-                    x = newX;
-                    continue;
+                    iteration++;
+                    previousPoint = currentPoint;
+                    currentPoint = nextPoint;
                 }
-            }
-            else
-            {
-                t_k /= 2;
-                continue;
             }
         }
 
-        return x;
-    }
-
-    static void Main()
-    {
-        double E = 0.3; // Погрешность
-        double E1 = 0.15; // Погрешность 1
-        double E2 = 0.2; // Погрешность 2
-        int M = 10; // Предельное число итераций
-
-        double[] x = new double[] { 0, 0.5 }; // Начальная точка
-
-        double[] result = GradientDescentAlgorithm(x, E, E1, E2, M);
-        Console.WriteLine($"Минимум функции: f({result[0]}, {result[1]}) = {Function(result)}");
+        static void Main(string[] args)
+        {
+            var startingPoint = (0.0, 0.5);
+            var epsilon = 0.1;
+            var epsilonGradient = 0.15;
+            var epsilonDifference = 0.2;
+            int maxIterations = 10;
+            var result = ConstantStepGradientDescent(startingPoint, epsilon, epsilonGradient, epsilonDifference, maxIterations);
+            Console.WriteLine($"x = ({Math.Round(result.Item1.Item1, 4)};{Math.Round(result.Item1.Item2, 4)}), f(x) = {Math.Round(FunctionValue(result.Item1), 4)}, iterations = {result.Item2}");
+        }
     }
 }
