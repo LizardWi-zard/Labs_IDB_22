@@ -10,8 +10,6 @@ namespace Lab1_MO
     {
         static double PhiFunction((double, double) point, (double, double) gradient, double t) => 6 * Math.Pow(point.Item1 - t * gradient.Item1, 2) + 0.4 * (point.Item1 - t * gradient.Item1) * (point.Item2 - t * gradient.Item2) + 5 * Math.Pow(point.Item2 - t * gradient.Item2, 2);
 
-        //static double F(double x) => 2 * Math.Pow(x, 3) + 9 * Math.Pow(x, 2) - 21;
-
         static int Fibonacci(int n)
         {
             if (n <= 1)
