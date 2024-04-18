@@ -4,8 +4,12 @@ namespace LW2
 {
     internal class Program
     {
-        static (double, double) CalculateGradient((double, double) point) => (12 * point.Item1 + 0.4 * point.Item2, 0.4 * point.Item1 + 10 * point.Item2);
-        static double FunctionValue((double, double) point) => 6 * point.Item1 * point.Item1 + 0.4 * point.Item1 * point.Item2 + 5 * point.Item2 * point.Item2;
+        static double firstCoef;
+        static double secondCoef;
+        static double thirdCoef;
+
+        static double FunctionValue((double, double) point) => firstCoef * point.Item1 * point.Item1 + secondCoef * point.Item1 * point.Item2 + thirdCoef * point.Item2 * point.Item2;
+        static (double, double) CalculateGradient((double, double) point) => (firstCoef * 2 * point.Item1 + secondCoef * point.Item2, secondCoef * point.Item1 + thirdCoef * 2 * point.Item2);
         static double Norm((double, double) point) => (Math.Sqrt(Math.Pow(point.Item1, 2) + Math.Pow(point.Item2, 2)));
       
         static bool IsAlgorithmEnded((double, double) previousPoint, (double, double) currentPoint, (double, double) nextPoint, double epsilon)
@@ -117,6 +121,10 @@ namespace LW2
             var epsilonGradient = 0.15;
             var epsilonDifference = 0.2;
             int maxIterations = 10;
+
+            firstCoef  = Double.Parse(Console.ReadLine());
+            secondCoef = Double.Parse(Console.ReadLine());
+            thirdCoef =  Double.Parse(Console.ReadLine());
 
             var result = ConstantStepGradientDescent(startingPoint, epsilon, epsilonGradient, epsilonDifference, maxIterations);
 
