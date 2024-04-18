@@ -7,7 +7,7 @@ namespace LW2
         static (double, double) CalculateGradient((double, double) point) => (12 * point.Item1 + 0.4 * point.Item2, 0.4 * point.Item1 + 10 * point.Item2);
         static double FunctionValue((double, double) point) => 6 * point.Item1 * point.Item1 + 0.4 * point.Item1 * point.Item2 + 5 * point.Item2 * point.Item2;
         static double Norm((double, double) point) => (Math.Sqrt(Math.Pow(point.Item1, 2) + Math.Pow(point.Item2, 2)));
-        static double PhiFunction((double, double) point, (double, double) gradient, double t) => 5 * Math.Pow(point.Item1 - t * gradient.Item1, 2) + 0.6 * (point.Item1 - t * gradient.Item1) * (point.Item2 - t * gradient.Item2) + 2 * Math.Pow(point.Item2 - t * gradient.Item2, 2);
+        static double PhiFunction((double, double) point, (double, double) gradient, double t) => 6 * Math.Pow(point.Item1 - t * gradient.Item1, 2) + 0.4 * (point.Item1 - t * gradient.Item1) * (point.Item2 - t * gradient.Item2) + 5 * Math.Pow(point.Item2 - t * gradient.Item2, 2);
 
         static bool IsAlgorithmEnded((double, double) previousPoint, (double, double) currentPoint, (double, double) nextPoint, double epsilon)
         {
@@ -67,8 +67,10 @@ namespace LW2
             do
             {
                 iteration++;
+
                 double f_left = PhiFunction(point, gradient, left);
                 double f_right = PhiFunction(point, gradient, right);
+
                 if (f_left <= f_right)
                 {
                     upperBound = right;
