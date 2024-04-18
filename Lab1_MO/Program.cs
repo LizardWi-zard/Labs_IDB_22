@@ -17,37 +17,40 @@ namespace LW2
 
         static void PrintIterationInfo(int iteration, (double, double) currentPoint, (double, double) gradient, double functionValue)
         {
-            Console.WriteLine($"Iteration {iteration}:");
-            Console.WriteLine($"Current point: ({Math.Round(currentPoint.Item1, 4)}, {Math.Round(currentPoint.Item2, 4)})");
-            Console.WriteLine($"Gradient: ({Math.Round(gradient.Item1, 4)}, {Math.Round(gradient.Item2, 4)})");
-            Console.WriteLine($"Function value: {Math.Round(functionValue, 4)}");
-            Console.WriteLine();
+            Console.WriteLine($"Current point: ({Math.Round(currentPoint.Item1, 4)}, {Math.Round(currentPoint.Item2, 4)})\n" +
+                              $"Gradient: ({Math.Round(gradient.Item1, 4)}, {Math.Round(gradient.Item2, 4)})\n" + 
+                              $"Function value: {Math.Round(functionValue, 4)}\n");
         }
 
         static ((double, double), int) ConstantStepGradientDescent((double, double) startingPoint, double epsilon, double epsilonGradient, double epsilonDifference, int maxIterations)
         {
-            var previousPoint = (startingPoint.Item1, startingPoint.Item2);
-            var currentPoint = (startingPoint.Item1, startingPoint.Item2);
-            var nextPoint = (startingPoint.Item1, startingPoint.Item2);
-            double step;
+            var previousPoint = startingPoint;
+            var currentPoint = startingPoint;
+            var nextPoint = startingPoint;
+            double step;;
             int iteration = 0;
 
             while (true)
             {
+                Console.WriteLine($"Iteration {iteration + 1}:");
+
                 var currentGradient = CalculateGradient(currentPoint);
                 if (Norm(currentGradient) < epsilonGradient || iteration >= maxIterations)
                 {
+                    Console.WriteLine($"Norm for current gradient: {Norm(currentGradient)}");
                     return (currentPoint, iteration);
                 }
 
                 Console.WriteLine("Enter step:");
                 step = Double.Parse(Console.ReadLine());
 
+                var a = 0;
                 while (FunctionValue(nextPoint) - FunctionValue(currentPoint) >= 0)
                 {
                     nextPoint.Item1 = currentPoint.Item1 - step * currentGradient.Item1;
                     nextPoint.Item2 = currentPoint.Item2 - step * currentGradient.Item2;
                     step /= 2;
+
                 }
 
                 PrintIterationInfo(iteration, currentPoint, currentGradient, FunctionValue(currentPoint));
