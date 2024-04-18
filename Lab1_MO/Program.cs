@@ -5,6 +5,10 @@ namespace LW2
 {
     internal class Program
     {
+        static double firstCoef;
+        static double secondCoef;
+        static double thirdCoef;
+
         static (double, double) CalculateGradient((double, double) point) => (12 * point.Item1 + 0.4 * point.Item2, 0.4 * point.Item1 + 10 * point.Item2);
         static double FunctionValue((double, double) point) => 6 * point.Item1 * point.Item1 + 0.4 * point.Item1 * point.Item2 + 5 * point.Item2 * point.Item2;
         static double Norm((double, double) point) => (Math.Sqrt(Math.Pow(point.Item1, 2) + Math.Pow(point.Item2, 2)));
@@ -109,6 +113,16 @@ namespace LW2
             var epsilonGradient = 0.15;
             var epsilonDifference = 0.2;
             int maxIterations = 10;
+
+            Console.WriteLine("Enter coeficents of a function\nExample of function:\nf(x) = a * x1^2 + b * x1 * x2 + c * x2^2\nExample of input:\n6\n0,4\n5");
+
+            Console.WriteLine("Input a:");
+            firstCoef = Double.Parse(Console.ReadLine());
+            Console.WriteLine("Input b:");
+            secondCoef = Double.Parse(Console.ReadLine());
+            Console.WriteLine("Input c:");
+            thirdCoef = Double.Parse(Console.ReadLine());
+
             var result = FasterStepGradientDescent(startingPoint, epsilon, epsilonGradient, epsilonDifference, maxIterations);
             Console.WriteLine($"x = ({Math.Round(result.Item1.Item1, 4)};{Math.Round(result.Item1.Item2, 4)}), f(x) = {Math.Round(FunctionValue(result.Item1), 4)}, iterations = {result.Item2}");
         }
