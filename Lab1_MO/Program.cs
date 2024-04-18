@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lab1_MO;
+using System;
 
 namespace LW2
 {
@@ -40,7 +41,7 @@ namespace LW2
                 {
                     return (currentPoint, iteration);
                 }
-                step = GoldenRatioMethod(0, 1, epsilon, currentPoint, currentGradient);
+                step = FibonacciMethod.GetT(0, 1, epsilon, currentPoint, currentGradient);
                 nextPoint.Item1 = currentPoint.Item1 - step * currentGradient.Item1;
                 nextPoint.Item2 = currentPoint.Item2 - step * currentGradient.Item2;
                 PrintIterationInfo(iteration, currentPoint, currentGradient, FunctionValue(currentPoint));
