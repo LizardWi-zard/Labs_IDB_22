@@ -15,10 +15,11 @@ namespace LW2
             return condition1 && condition2;
         }
 
-        static void PrintIterationInfo(int iteration, (double, double) currentPoint, (double, double) gradient, double functionValue)
+        static void PrintIterationInfo(int iteration, (double, double) currentPoint, (double, double) gradient, double functionValue, double norm)
         {
             Console.WriteLine($"Current point: ({Math.Round(currentPoint.Item1, 4)}, {Math.Round(currentPoint.Item2, 4)})\n" +
-                              $"Gradient: ({Math.Round(gradient.Item1, 4)}, {Math.Round(gradient.Item2, 4)})\n" + 
+                              $"Gradient: ({Math.Round(gradient.Item1, 4)}, {Math.Round(gradient.Item2, 4)})\n" +
+                              $"Norm of currentGradient in point: {Math.Round(norm, 4)}" +
                               $"Function value: {Math.Round(functionValue, 4)}\n");
         }
 
@@ -37,7 +38,6 @@ namespace LW2
                 var currentGradient = CalculateGradient(currentPoint);
                 if (Norm(currentGradient) < epsilonGradient || iteration >= maxIterations)
                 {
-                    Console.WriteLine($"Norm for current gradient: {Norm(currentGradient)}");
                     return (currentPoint, iteration);
                 }
 
@@ -53,7 +53,7 @@ namespace LW2
 
                 }
 
-                PrintIterationInfo(iteration, currentPoint, currentGradient, FunctionValue(currentPoint));
+                PrintIterationInfo(iteration, currentPoint, currentGradient, FunctionValue(currentPoint), Norm(currentGradient));
 
                 if (IsAlgorithmEnded(previousPoint, currentPoint, nextPoint, epsilonDifference))
                 {
