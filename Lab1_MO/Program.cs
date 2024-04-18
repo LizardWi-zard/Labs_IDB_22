@@ -12,18 +12,40 @@ namespace LW2
 
         static bool IsAlgorithmEnded((double, double) previousPoint, (double, double) currentPoint, (double, double) nextPoint, double epsilon)
         {
-            var condition1 = Norm((nextPoint.Item1 - currentPoint.Item1, nextPoint.Item2 - currentPoint.Item2)) < epsilon && Math.Abs(FunctionValue(nextPoint) - FunctionValue(currentPoint)) < epsilon;
-            var condition2 = Norm((currentPoint.Item1 - previousPoint.Item1, currentPoint.Item2 - previousPoint.Item2)) < epsilon && Math.Abs(FunctionValue(currentPoint) - FunctionValue(previousPoint)) < epsilon;
-            return condition1 && condition2;
+            var condition1 = Norm((nextPoint.Item1 - currentPoint.Item1, nextPoint.Item2 - currentPoint.Item2)) < epsilon;
+            var condition2 = Norm((currentPoint.Item1 - previousPoint.Item1, currentPoint.Item2 - previousPoint.Item2)) < epsilon;
+            var condition3 = Math.Abs(FunctionValue(nextPoint) - FunctionValue(currentPoint)) < epsilon;
+            var condition4 = Math.Abs(FunctionValue(currentPoint) - FunctionValue(previousPoint)) < epsilon;
+
+            if (!condition1)
+            {
+                Console.WriteLine("Norm of (next x - x) >= epsilon2\n");
+                return false;
+            }
+            if (!condition2)
+            {
+                Console.WriteLine("f(next x) - f(x) >= epsilon2\n");
+                return false;
+            }
+            if (!condition3)
+            {
+                Console.WriteLine("Norm of (x - previous x) >= epsilon2\n");
+                return false;
+            }
+            if (!condition4)
+            {
+                Console.WriteLine("f(x) - f(previous x) >= epsilon2\n");
+                return false;
+            }
+            return true;
         }
 
-        static void PrintIterationInfo(int iteration, (double, double) currentPoint, (double, double) gradient, double functionValue)
+        static void PrintIterationInfo(int iteration, (double, double) currentPoint, (double, double) gradient, double functionValue, double norm)
         {
-            Console.WriteLine($"Iteration {iteration}:");
-            Console.WriteLine($"Current point: ({Math.Round(currentPoint.Item1, 4)}, {Math.Round(currentPoint.Item2, 4)})");
-            Console.WriteLine($"Gradient: ({Math.Round(gradient.Item1, 4)}, {Math.Round(gradient.Item2, 4)})");
-            Console.WriteLine($"Function value: {Math.Round(functionValue, 4)}");
-            Console.WriteLine();
+            Console.WriteLine($"Current point: ({Math.Round(currentPoint.Item1, 4)}, {Math.Round(currentPoint.Item2, 4)})\n" +
+                              $"Gradient: ({Math.Round(gradient.Item1, 4)}, {Math.Round(gradient.Item2, 4)})\n" +
+                              $"Norm of gradient in point: {Math.Round(norm, 4)}\n" +
+                              $"Function value: {Math.Round(functionValue, 4)}");
         }
 
         static ((double, double), int) FasterStepGradientDescent((double, double) startingPoint, double epsilon, double epsilonGradient, double epsilonDifference, int maxIterations)
@@ -36,15 +58,37 @@ namespace LW2
 
             while (true)
             {
+                Console.WriteLine($"k = {iteration}:");
+
                 var currentGradient = CalculateGradient(currentPoint);
-                if (Norm(currentGradient) < epsilonGradient || iteration >= maxIterations)
+                var normIsOk = Norm(currentGradient) < epsilonGradient;
+                var iterationCap = iteration >= maxIterations;
+                
+                if (normIsOk)
                 {
                     return (currentPoint, iteration);
                 }
+                else
+                {
+                    Console.WriteLine("norm of gradient >= epsilon");
+                }
+
+                if (iterationCap)
+                {
+                    return (currentPoint, iteration);
+                }
+                else
+                {
+                    Console.WriteLine("K < M");
+                }
+
                 step = FibonacciMethod.GetT(0, 1, epsilon, currentPoint, currentGradient);
+
                 nextPoint.Item1 = currentPoint.Item1 - step * currentGradient.Item1;
                 nextPoint.Item2 = currentPoint.Item2 - step * currentGradient.Item2;
-                PrintIterationInfo(iteration, currentPoint, currentGradient, FunctionValue(currentPoint));
+
+                PrintIterationInfo(iteration, currentPoint, currentGradient, FunctionValue(currentPoint), Norm(currentGradient));
+
                 if (IsAlgorithmEnded(previousPoint, currentPoint, nextPoint, epsilonDifference))
                 {
                     return (nextPoint, iteration);
@@ -52,42 +96,10 @@ namespace LW2
                 else
                 {
                     iteration++;
-                    previousPoint.Item1 = currentPoint.Item1;
-                    previousPoint.Item2 = currentPoint.Item2;
-                    currentPoint.Item1 = nextPoint.Item1;
-                    currentPoint.Item2 = nextPoint.Item2;
+                    previousPoint = currentPoint;
+                    currentPoint = nextPoint;
                 }
             }
-        }
-
-        static double GoldenRatioMethod(double lowerBound, double upperBound, double tolerance, (double, double) point, (double, double) gradient)
-        {
-            int iteration = -1;
-            double left = lowerBound + (3 - Math.Sqrt(5)) / 2 * (upperBound - lowerBound);
-            double right = lowerBound + upperBound - left;
-            do
-            {
-                iteration++;
-
-                double f_left = PhiFunction(point, gradient, left);
-                double f_right = PhiFunction(point, gradient, right);
-
-                if (f_left <= f_right)
-                {
-                    upperBound = right;
-                    right = left;
-                    left = lowerBound + upperBound - left;
-                }
-                else
-                {
-                    lowerBound = left;
-                    left = right;
-                    right = lowerBound + upperBound - right;
-                }
-
-            } while (Math.Abs(lowerBound - upperBound) > tolerance);
-
-            return (lowerBound + upperBound) / 2;
         }
 
         static void Main(string[] args)
