@@ -10,17 +10,40 @@ namespace LW2
       
         static bool IsAlgorithmEnded((double, double) previousPoint, (double, double) currentPoint, (double, double) nextPoint, double epsilon)
         {
-            var condition1 = Norm((nextPoint.Item1 - currentPoint.Item1, nextPoint.Item2 - currentPoint.Item2)) < epsilon && Math.Abs(FunctionValue(nextPoint) - FunctionValue(currentPoint)) < epsilon;
-            var condition2 = Norm((currentPoint.Item1 - previousPoint.Item1, currentPoint.Item2 - previousPoint.Item2)) < epsilon && Math.Abs(FunctionValue(currentPoint) - FunctionValue(previousPoint)) < epsilon;
-            return condition1 && condition2;
+            var condition1 = Norm((nextPoint.Item1 - currentPoint.Item1, nextPoint.Item2 - currentPoint.Item2)) < epsilon;
+            var condition2 = Norm((currentPoint.Item1 - previousPoint.Item1, currentPoint.Item2 - previousPoint.Item2)) < epsilon;
+            var condition3 = Math.Abs(FunctionValue(nextPoint) - FunctionValue(currentPoint)) < epsilon;
+            var condition4 = Math.Abs(FunctionValue(currentPoint) - FunctionValue(previousPoint)) < epsilon;
+
+            if (!condition1)
+            {
+                Console.WriteLine("Norm of (next x - x) >= epsilon2\n");
+                return false;
+            }
+            if (!condition2)
+            {
+                Console.WriteLine("f(next x) - f(x) >= epsilon2\n");
+                return false;
+            }
+            if (!condition3)
+            {
+                Console.WriteLine("Norm of (x - previous x) >= epsilon2\n");
+                return false;
+            }
+            if (!condition4)
+            {
+                Console.WriteLine("f(x) - f(previous x) >= epsilon2\n");
+                return false;
+            }
+            return true;
         }
 
         static void PrintIterationInfo(int iteration, (double, double) currentPoint, (double, double) gradient, double functionValue, double norm)
         {
             Console.WriteLine($"Current point: ({Math.Round(currentPoint.Item1, 4)}, {Math.Round(currentPoint.Item2, 4)})\n" +
                               $"Gradient: ({Math.Round(gradient.Item1, 4)}, {Math.Round(gradient.Item2, 4)})\n" +
-                              $"Norm of currentGradient in point: {Math.Round(norm, 4)}" +
-                              $"Function value: {Math.Round(functionValue, 4)}\n");
+                              $"Norm of gradient in point: {Math.Round(norm, 4)}\n" +
+                              $"Function value: {Math.Round(functionValue, 4)}");
         }
 
         static ((double, double), int) ConstantStepGradientDescent((double, double) startingPoint, double epsilon, double epsilonGradient, double epsilonDifference, int maxIterations)
@@ -28,17 +51,34 @@ namespace LW2
             var previousPoint = startingPoint;
             var currentPoint = startingPoint;
             var nextPoint = startingPoint;
-            double step;;
+            double step;
             int iteration = 0;
 
             while (true)
             {
-                Console.WriteLine($"Iteration {iteration + 1}:");
+                Console.WriteLine($"k {iteration }:");
 
                 var currentGradient = CalculateGradient(currentPoint);
-                if (Norm(currentGradient) < epsilonGradient || iteration >= maxIterations)
+
+                var normIsOk = Norm(currentGradient) < epsilonGradient;
+                var iterationCap = iteration >= maxIterations;
+
+                if (normIsOk)
                 {
                     return (currentPoint, iteration);
+                }
+                else
+                {
+                    Console.WriteLine("norm of gradient >= epsilon");
+                }
+
+                if (iterationCap)
+                {
+                    return (currentPoint, iteration);
+                }
+                else
+                {
+                    Console.WriteLine("K < M");
                 }
 
                 Console.WriteLine("Enter step:");
@@ -50,7 +90,7 @@ namespace LW2
                     nextPoint.Item1 = currentPoint.Item1 - step * currentGradient.Item1;
                     nextPoint.Item2 = currentPoint.Item2 - step * currentGradient.Item2;
                     step /= 2;
-
+                    Console.WriteLine($"Step: {step}");
                 }
 
                 PrintIterationInfo(iteration, currentPoint, currentGradient, FunctionValue(currentPoint), Norm(currentGradient));
@@ -65,6 +105,8 @@ namespace LW2
                     previousPoint = currentPoint;
                     currentPoint = nextPoint;
                 }
+
+                Console.WriteLine($"Next point: ({Math.Round(nextPoint.Item1, 4)}, {Math.Round(nextPoint.Item2, 4)})\n");
             }
         }
 
@@ -75,8 +117,10 @@ namespace LW2
             var epsilonGradient = 0.15;
             var epsilonDifference = 0.2;
             int maxIterations = 10;
+
             var result = ConstantStepGradientDescent(startingPoint, epsilon, epsilonGradient, epsilonDifference, maxIterations);
-            Console.WriteLine($"x = ({Math.Round(result.Item1.Item1, 4)};{Math.Round(result.Item1.Item2, 4)}), f(x) = {Math.Round(FunctionValue(result.Item1), 4)}, iterations = {result.Item2}");
+
+            Console.WriteLine($"\nx = ({Math.Round(result.Item1.Item1, 4)};{Math.Round(result.Item1.Item2, 4)}), f(x) = {Math.Round(FunctionValue(result.Item1), 4)}, iterations = {result.Item2}");
         }
     }
 }
