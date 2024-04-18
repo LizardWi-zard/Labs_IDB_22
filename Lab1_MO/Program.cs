@@ -122,8 +122,13 @@ namespace LW2
             var epsilonDifference = 0.2;
             int maxIterations = 10;
 
+            Console.WriteLine("Enter coeficents of a function\nExample of function:\nf(x) = a * x1^2 + b * x1 * x2 + c * x2^2\nExample of input:\n6\n0,4\n5");
+
+            Console.WriteLine("Input a:");
             firstCoef  = Double.Parse(Console.ReadLine());
+            Console.WriteLine("Input b:");
             secondCoef = Double.Parse(Console.ReadLine());
+            Console.WriteLine("Input c:");
             thirdCoef =  Double.Parse(Console.ReadLine());
 
             var result = ConstantStepGradientDescent(startingPoint, epsilon, epsilonGradient, epsilonDifference, maxIterations);
