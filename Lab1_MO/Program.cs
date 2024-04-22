@@ -20,7 +20,7 @@ class Program
 
         while (true)
         {
-            double[] gradient = Gradient(x, a, b); // Шаг 3: Вычисляем градиент в точке x^k
+            double[] gradient = Gradient(x, a, b, c); // Шаг 3: Вычисляем градиент в точке x^k
             Console.WriteLine($"Градиент: ({gradient[0]}, {gradient[1]})");
 
             if (Norm(gradient) < E1 || k >= M) // Шаг 4: Проверяем критерий окончания
@@ -126,11 +126,12 @@ class Program
         return a * Math.Pow(x[0], 2) + b * x[0] * x[1] + c * Math.Pow(x[1], 2); // Функция ax1^2 + bx1x2 + cx2^2
     }
 
-    static double[] Gradient(double[] x, double a, double b)
+
+    static double[] Gradient(double[] x, double a, double b, double c)
     {
         double[] gradient = new double[2];
         gradient[0] = a * 2 * x[0] + b * x[1];
-        gradient[1] = a * x[0] + 2 * b * x[1];
+        gradient[1] = b * x[0] + 2 * c * x[1];
         return gradient; // Градиент функции
     }
 
