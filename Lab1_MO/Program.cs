@@ -87,6 +87,8 @@ namespace LW2
 
                 step = FibonacciMethod.GetT(0, 1, epsilon, currentPoint, currentGradient);
 
+                Console.WriteLine($"Step: {step}");
+
                 nextPoint.Item1 = currentPoint.Item1 - step * currentGradient.Item1;
                 nextPoint.Item2 = currentPoint.Item2 - step * currentGradient.Item2;
 
