@@ -23,14 +23,21 @@ class Program
             double[] gradient = Gradient(x, a, b, c); // Шаг 3: Вычисляем градиент в точке x^k
             Console.WriteLine($"Градиент: ({gradient[0]}, {gradient[1]})");
 
-            if (Norm(gradient) < E1 || k >= M) // Шаг 4: Проверяем критерий окончания
+            if (Norm(gradient) < E1)
             {
                 Console.WriteLine("Оптимальное значение найдено.");
                 Console.WriteLine($"x* = ({x[0]}, {x[1]})");
                 break;
             }
 
-            double[,] Hessian = HessianMatrix(a, b); // Шаг 6: Вычисляем матрицу Гессе в точке x^k
+            if (k >= M)
+            {
+                Console.WriteLine("Оптимальное значение найдено.");
+                Console.WriteLine($"x* = ({x[0]}, {x[1]})");
+                break;
+            }
+
+            double[,] Hessian = HessianMatrix(a, b, c); // Шаг 6: Вычисляем матрицу Гессе в точке x^k
             Console.WriteLine($"Матрица Гессе: [{Hessian[0, 0]}, {Hessian[0, 1]}; {Hessian[1, 0]}, {Hessian[1, 1]}]");
 
             double[,] inverseHessian = InverseMatrix(Hessian); // Шаг 7: Вычисляем обратную матрицу Гессе
@@ -115,7 +122,7 @@ class Program
 
     static void PrintVariables(double a, double b, double c, double E1, double E2, int M, int k, double[] x)
     {
-        Console.WriteLine($"a = {a}, b = {b}, c = {c}");
+        Console.WriteLine($"\na = {a}, b = {b}, c = {c}");
         Console.WriteLine($"E1 = {E1}, E2 = {E2}, M = {M}");
         Console.WriteLine($"k = {k}");
         Console.WriteLine($"x = ({x[0]}, {x[1]})");
@@ -132,12 +139,12 @@ class Program
         double[] gradient = new double[2];
         gradient[0] = a * 2 * x[0] + b * x[1];
         gradient[1] = b * x[0] + 2 * c * x[1];
-        return gradient; // Градиент функции
+        return gradient;
     }
 
-    static double[,] HessianMatrix(double a, double b)
+    static double[,] HessianMatrix(double a, double b, double c)
     {
-        return new double[,] { { a * 2, b }, { a, 2 * b } }; // Матрица Гессе
+        return new double[,] { { a * 2, b }, { b, c * 2 } };
     }
 
     static double[,] InverseMatrix(double[,] matrix)
@@ -154,12 +161,7 @@ class Program
 
     static double Norm(double[] vector)
     {
-        double sum = 0;
-        foreach (var element in vector)
-        {
-            sum += Math.Pow(element, 2);
-        }
-        return Math.Sqrt(sum);
+        return Math.Sqrt(Math.Pow(vector[0], 2) + Math.Pow(vector[1], 2));
     }
 
     static double[] MultiplyMatrixVector(double[,] matrix, double[] vector)
