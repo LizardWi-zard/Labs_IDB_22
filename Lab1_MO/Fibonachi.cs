@@ -90,15 +90,13 @@ namespace Lab1_MO
 
         static public double GetT(double lowerBound, double upperBound, double tolerance, (double, double) point, (double, double) gradient)
         {
-            double a = -1;
-            double b = 3;
+            double a = lowerBound;
+            double b = upperBound;
             double l = 0.3;
             double e = tolerance;
 
             return FibonacciSearch(a, b, e, point, gradient);
 
-            //     Console.WriteLine($"Минимум функции на интервале [{a}, {b}] с длиной интервала {l} и константой различимости {e} равен {min}");
-            //     Console.WriteLine("Значение функции в найденной точки:" + F(min));
         }
 
         static void Output(int k, int N, double a, double b, double y, double z, double fy, double fz)

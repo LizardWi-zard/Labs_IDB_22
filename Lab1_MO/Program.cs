@@ -1,6 +1,6 @@
 ﻿using Lab1_MO;
 using System;
-
+    
 namespace LW2
 {
     internal class Program
