@@ -1,116 +1,179 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Lab1_MO
+﻿namespace LW3
 {
-    static class FibonacciMethod
+    internal class Program
     {
-        static double PhiFunction((double, double) point, (double, double) gradient, double t) => 6 * Math.Pow(point.Item1 - t * gradient.Item1, 2) + 0.4 * (point.Item1 - t * gradient.Item1) * (point.Item2 - t * gradient.Item2) + 5 * Math.Pow(point.Item2 - t * gradient.Item2, 2);
+        public static double coef1 { get; set; }
+        public static double coef2 { get; set; }
+        public static double coef3 { get; set; }
 
-        static int Fibonacci(int n)
+        public class Point
         {
-            if (n <= 1)
+            public double x1;
+            public double x2;
+
+            public Point(double x1, double x2)
             {
-                return n;
+                this.x1 = x1;
+                this.x2 = x2;
             }
-
-            return Fibonacci(n - 1) + Fibonacci(n - 2);
         }
 
-        static int FindN(double a, double b, double l)
+        static Point GradFn(Point x)
         {
-            var length = b - a;
-            var N = 0;
-
-            while (Fibonacci(N) < length / l)
-                N++;
-            return N;
+            var x1 = x.x1;
+            var x2 = x.x2;
+            var result = new Point(coef1 * x1 + coef2 * x2, coef2 * x1 + coef3 * x2);
+            return result;
         }
 
-        static double FibonacciSearch(double a, double b, double e, (double, double) point, (double, double) gradient)
+        static double Function(Point x)
         {
-            var N = FindN(a, b, e);
-            var k = 0;
+            var x1 = x.x1;
+            var x2 = x.x2;
+            var result = coef1 * Math.Pow(x1, 2) + coef2 * x1 * x2 + coef3 * Math.Pow(x2, 2);
+            return result;
+        }
 
-            var y = a + (double)Fibonacci(N - 2) / Fibonacci(N) * (b - a);
-            var z = a + (double)Fibonacci(N - 1) / Fibonacci(N) * (b - a);
+        static double Norm(Point x)
+        {
+            var x1 = x.x1;
+            var x2 = x.x2;
+            var result = Math.Sqrt(Math.Pow(x1, 2) + Math.Pow(x2, 2));
+            return result;
+        }
 
-            var fy = PhiFunction(point, gradient, y);
-            var fz = PhiFunction(point, gradient, z);
-
-            while (k != N - 3)
+        static bool IsAlgorithmEnded(Point prevX, Point curX, Point nextX, double epsilon2)
+        {
+            var condition1 = Norm(new Point(nextX.x1 - curX.x1, nextX.x2 - curX.x2)) < epsilon2;
+            if (!condition1)
             {
-                if (fy <= fz)
+                Console.WriteLine("Norm of (next x - x) >= epsilon2\n");
+                return false;
+            }
+            var condition2 = Math.Abs(Function(nextX) - Function(curX)) < epsilon2;
+            if (!condition2)
+            {
+                Console.WriteLine("f(next x) - f(x) >= epsilon2\n");
+                return false;
+            }
+            var condition3 = Norm(new Point(curX.x1 - prevX.x1, curX.x2 - prevX.x2)) < epsilon2;
+            if (!condition3)
+            {
+                Console.WriteLine("Norm of (x - previous x) >= epsilon2\n");
+                return false;
+            }
+            var condition4 = Math.Abs(Function(curX) - Function(prevX)) < epsilon2;
+            if (!condition4)
+            {
+                Console.WriteLine("f(x) - f(previous x) >= epsilon2\n");
+                return false;
+            }
+            return true;
+        }
+
+        static double[,] Gessian(Point x)
+        {
+            double[,] result = { { 2 * coef1, coef2 }, { coef2, 2 * coef3 } };
+            return result;
+        }
+
+        static double[,] ReversedGessian(Point x, double detGessian)
+        {
+            detGessian = Math.Abs(detGessian);
+            double[,] result = { { 2 * coef3 / detGessian, -coef2 / detGessian }, { -coef2 / detGessian, 2 * coef1 / detGessian } };
+            return result;
+        }
+
+        static double detCalc(double[,] matrix)
+        {
+            var result = matrix[0, 0] * matrix[1, 1] - matrix[1, 0] * matrix[0, 1];
+            return result;
+        }
+
+        static (Point, int) NewtonMethod(Point x, double epsilon1, double epsilon2, int M)
+        {
+            var prevX = new Point(x.x1, x.x2);
+            var curX = new Point(x.x1, x.x2);
+            var nextX = new Point(x.x1, x.x2);
+            double step = 0;
+            int k = 0;
+
+            while (true)
+            {
+                var curGrad = GradFn(curX);
+                if (Norm(curGrad) <= epsilon1)
                 {
-                    b = z;
-                    z = y;
-                    y = a + (double)Fibonacci(N - k - 3) / Fibonacci(N - k - 1) * (b - a);
-                    fz = fy;
-                    fy = PhiFunction(point, gradient, y);
+                    return (curX, k);
                 }
                 else
                 {
-                    a = y;
-                    y = z;
-                    z = a + (double)Fibonacci(N - k - 2) / Fibonacci(N - k - 1) * (b - a);
-                    fy = fz;
-                    fz = PhiFunction(point, gradient, z);
+                    Console.WriteLine("Norm of gradient >= epsilon1");
+                }
+                if (k >= M)
+                {
+                    return (curX, k);
+                }
+                else
+                {
+                    Console.WriteLine("k<M");
                 }
 
-                k++;
+                var gessian = Gessian(curX);
+                var detGessian = detCalc(gessian);
+                var reversedGessian = ReversedGessian(x, detGessian);
+                Point d = new Point(0, 0);
+                bool flag = false;
+                if (reversedGessian[0, 0] > 0 && detCalc(reversedGessian) > 0)
+                {
+                    d.x1 = -(reversedGessian[0, 0] * curGrad.x1 + reversedGessian[0, 1] * curGrad.x2);
+                    d.x2 = -(reversedGessian[1, 0] * curGrad.x1 + reversedGessian[1, 1] * curGrad.x2);
+                }
+                else
+                {
+                    d.x1 = -curGrad.x1;
+                    d.x2 = -curGrad.x2;
+                    flag = true;
+                }
+                if (flag == false)
+                {
+                    step = 1;
+                }
+                else
+                {
+                    //както искать t
+                }
+                nextX.x1 = curX.x1 + step * d.x1;
+                nextX.x2 = curX.x2 + step * d.x2;
 
+                if (IsAlgorithmEnded(prevX, curX, nextX, epsilon2))
+                {
+                    return (nextX, k);
+                }
+                else
+                {
+                    k++;
+                    prevX.x1 = curX.x1;
+                    prevX.x2 = curX.x2;
+                    curX.x1 = nextX.x1;
+                    curX.x2 = nextX.x2;
+                }
             }
-
-            var yN = (a + b) / 2;
-            var zN = yN;
-
-            if (k == N - 3)
-            {
-                yN = zN = (a + b) / 2;
-                zN = yN + e;
-            }
-
-            var fyN = PhiFunction(point, gradient, yN);
-            var fzN = PhiFunction(point, gradient, zN);
-
-            if (fyN <= fzN)
-            {
-                b = zN;
-            }
-            else
-            {
-                a = yN;
-            }
-
-            return (a + b) / 2;
         }
 
-        static public double GetT(double lowerBound, double upperBound, double tolerance, (double, double) point, (double, double) gradient)
+        static void Main()
         {
-            double a = -1;
-            double b = 3;
-            double l = 0.3;
-            double e = tolerance;
+            var x0 = new Point(1.5, 0.5);
+            var epsilon1 = 0.15;
+            var epsilon2 = 0.2;
+            int M = 10;
 
-            return FibonacciSearch(a, b, e, point, gradient);
+            Console.WriteLine("Enter a, b, c for equation\nax1^2 + bx1x2 + cx2^2");
+            coef1 = Double.Parse(Console.ReadLine());
+            coef2 = Double.Parse(Console.ReadLine());
+            coef3 = Double.Parse(Console.ReadLine());
 
-            //     Console.WriteLine($"Минимум функции на интервале [{a}, {b}] с длиной интервала {l} и константой различимости {e} равен {min}");
-            //     Console.WriteLine("Значение функции в найденной точки:" + F(min));
-        }
-
-        static void Output(int k, int N, double a, double b, double y, double z, double fy, double fz)
-        {
-            Console.WriteLine($"\niteration {k}:");
-            Console.WriteLine("a: " + Math.Round(a, 6) + "\n" +
-                              "b: " + Math.Round(b, 6) + "\n" +
-                              "N: " + N + "\n" +
-                              "y: " + Math.Round(y, 6) + "\n" +
-                              "z: " + Math.Round(z, 6) + "\n" +
-                              "fy: " + Math.Round(fy, 6) + "\n" +
-                              "fz: " + Math.Round(fz, 6) + "\n");
+            var result = NewtonMethod(x0, epsilon1, epsilon2, M);
+            Console.WriteLine($"x = ({Math.Round(result.Item1.x1, 4)};{Math.Round(result.Item1.x2, 4)}), f(x) = {Math.Round(Function(result.Item1), 4)}, k = {result.Item2}");
         }
     }
 }
