@@ -1,191 +1,201 @@
-﻿using System;
-
-class Program
+﻿namespace LW3
 {
-    static void Main(string[] args)
+    internal class Program
     {
-        double E1 = 0.15; // Условие для нормы градиента
-        double E2 = 0.2; // Условие для изменения значения функции и точности аргумента
-        int M = 10; // Максимальное число итераций
+        public static double a = 0;
+        public static double b = 0;
+        public static double c = 0;
 
-        double a = 6; // Коэффициент a
-        double b = 0.4; // Коэффициент b
-        double c = 5; // Коэффициент c
-
-        int k = 0; // Счетчик итераций
-        double[] x = new double[] { 1.5, 0.5 }; // Начальное значение аргумента
-
-        Console.WriteLine("Итерация 0:");
-        PrintVariables(a, b, c, E1, E2, M, k, x);
-
-        while (true)
+        static (double, double) GetGradient((double, double) x) => (2 * a * x.Item1 + b * x.Item2, b * x.Item1 + 2 * c * x.Item2);
+        static double F((double, double) x) => a * Math.Pow(x.Item1, 2) + b * x.Item1 * x.Item2 + c * Math.Pow(x.Item2, 2);
+        static double Norm((double, double) x) => Math.Sqrt(Math.Pow(x.Item1, 2) + Math.Pow(x.Item2, 2));
+        static double GetDet(double[,] matrix) => matrix[0, 0] * matrix[1, 1] - matrix[1, 0] * matrix[0, 1];
+        
+        static bool StopSearch((double, double) previousP, (double, double) currentP, (double, double) nextP, double e2)
         {
-            double[] gradient = Gradient(x, a, b, c); // Шаг 3: Вычисляем градиент в точке x^k
-            Console.WriteLine($"Градиент: ({gradient[0]}, {gradient[1]})");
+            var normOfNextPoint = Norm((nextP.Item1 - currentP.Item1, nextP.Item2 - currentP.Item2));
+            var normOfPrevPoint = Norm((currentP.Item1 - previousP.Item1, currentP.Item2 - previousP.Item2));
+            var absNext = Math.Abs(F(nextP) - F(currentP));
+            var absPrev = Math.Abs(F(currentP) - F(previousP));
 
-            if (Norm(gradient) < E1)
+            Console.WriteLine($"-------\nNorm of (next x - x) = {Math.Round(normOfNextPoint, 4)}\n" +
+                              $"Norm of (x - previous x) = {Math.Round(normOfPrevPoint, 4)}\n" +
+                              $"|f(next x) - f(x)| = |{Math.Round(absNext, 4)}|\n" +
+                              $"|f(x) - f(previous x)| = |{Math.Round(absPrev, 4)}|\n-------");
+
+            if (!(normOfNextPoint < e2))
             {
-                Console.WriteLine("Оптимальное значение найдено.");
-                Console.WriteLine($"x* = ({x[0]}, {x[1]})");
-                break;
+                Console.WriteLine("||(next x - x)|| >= e2\n");
+                return false;
+            }
+            if (!(normOfPrevPoint < e2))
+            {
+                Console.WriteLine("||(x - previous x)|| >= e2\n");
+                return false;
+            }
+            if (!(absNext < e2))
+            {
+                Console.WriteLine("|f(next x) - f(x)| >= e2\n");
+                return false;
+            }
+            if (!(absPrev < e2))
+            {
+                Console.WriteLine("|f(x) - f(previous x)| >= e2\n");
+                return false;
             }
 
-            if (k >= M)
+            return true;
+        }
+
+        static double[,] GetGessianMatrix()
+        {
+            double[,] result = { { 2 * a, b }, { b, 2 * c } };
+            Console.WriteLine($"Gessian matrix:\n|  {Math.Round(result[0, 0], 4)}; {Math.Round(result[0, 1], 4)} |\n" +
+                                               $"| {Math.Round(result[1, 0], 4)};  {Math.Round(result[1, 1], 4)} |\n-------");
+            return result;
+        }
+
+        static double[,] GetReversedGessianMatrix(double detGessian)
+        {
+            detGessian = Math.Abs(detGessian);
+
+            double[,] result = { { 2 * c / detGessian, -b / detGessian }, 
+                                    { -b / detGessian, 2 * a / detGessian } };
+
+            Console.WriteLine($"Reversed Gessian matrix:\n|  {Math.Round(result[0, 0], 4)}; {Math.Round(result[0, 1], 4)} |\n" +
+                                                        $"| {Math.Round(result[1, 0], 4)};  {Math.Round(result[1, 1], 4)} |\n-------");
+            return result;
+        }
+
+
+        static ((double, double), int) Method((double, double) x, double e1, double e2, int M)
+        {
+            var previousP = x;
+            var currentP = x;
+            var nextP = x;
+            double step = 1;
+            int k = 0;
+
+            Console.WriteLine($"f(x) = {a}x1^2 + {b}x1x2 + {c}x2^2, x0 = ({currentP.Item1};{currentP.Item2}), epsilon1 = {e1}, epsilon2 = {e2}, M = {M}\n" +
+                              $"Gradient(x) = ({2 * a}x1 + {b}x2;{b}x1 + {2 * c}x2)\nH(x):\n|{2 * a} {b}|\n|{b} {2 * c} |");
+            
+            Console.WriteLine($"Function at the start: {Math.Round(F(currentP), 4)}\n");
+
+            while (true)
             {
-                Console.WriteLine("Оптимальное значение найдено.");
-                Console.WriteLine($"x* = ({x[0]}, {x[1]})");
-                break;
-            }
+                Console.WriteLine($"\nIteration {k}:");
 
-            double[,] Hessian = HessianMatrix(a, b, c); // Шаг 6: Вычисляем матрицу Гессе в точке x^k
-            Console.WriteLine($"Матрица Гессе: [{Hessian[0, 0]}, {Hessian[0, 1]}; {Hessian[1, 0]}, {Hessian[1, 1]}]");
+                var curGrad = GetGradient(currentP);
 
-            double[,] inverseHessian = InverseMatrix(Hessian); // Шаг 7: Вычисляем обратную матрицу Гессе
-            Console.WriteLine($"Обратная матрица Гессе: [{inverseHessian[0, 0]}, {inverseHessian[0, 1]}; {inverseHessian[1, 0]}, {inverseHessian[1, 1]}]");
+                Console.WriteLine($"current x: ({Math.Round(currentP.Item1, 4)}; {Math.Round(currentP.Item2, 4)}) \n" +
+                                  $"F: {Math.Round(F(currentP), 4)}\nGradient of Function: ({Math.Round(curGrad.Item1, 4)}; {Math.Round(curGrad.Item2, 4)})");
 
-            if (IsPositiveDefinite(inverseHessian)) // Шаг 8: Проверяем положительную определенность матрицы
-            {
-                double[] dk = MultiplyMatrixVector(inverseHessian, gradient); // Шаг 9: Находим направление dk
-                Console.WriteLine($"Направление: ({dk[0]}, {dk[1]})");
-
-                double tk = 1; // Шаг 10: Инициализируем шаг t_k
-
-                double[] newX = new double[x.Length];
-                for (int i = 0; i < x.Length; i++)
+                if (Norm(curGrad) <= e1)
                 {
-                    newX[i] = x[i] + tk * dk[i]; // Шаг 10: Находим новую точку x^(k+1)
+                    return (currentP, k);
                 }
-                Console.WriteLine($"Новая точка: ({newX[0]}, {newX[1]})");
-
-                if (Function(newX, a, b, c) < Function(x, a, b, c)) // Шаг 11: Проверяем условие улучшения
+                else
                 {
-                    if (Norm(newX) < E2 || Math.Abs(Function(newX, a, b, c) - Function(x, a, b, c)) < E2) // Проверяем условие на точность
+                    Console.WriteLine($"Norm of gradient >= epsilon1\n{Math.Round(Norm(curGrad), 4)} >= {e1}\n-------");
+                }
+
+                if (k >= M)
+                {
+                    return (currentP, k);
+                }
+                else
+                {
+                    Console.WriteLine($"k < M\n{k} < {M}\n-------");
+                }
+
+                var reversedGessian = GetReversedGessianMatrix(GetDet(GetGessianMatrix()));
+                var d = (0.0, 0.0);
+                bool flag = false;
+
+                Console.WriteLine($"det(H^-1(xk)) = {Math.Round(GetDet(reversedGessian), 4)}");
+                
+                if (reversedGessian[0, 0] > 0 && GetDet(reversedGessian) > 0)
+                {
+                    d = (-(reversedGessian[0, 0] * curGrad.Item1 + reversedGessian[0, 1] * curGrad.Item2), 
+                         -(reversedGessian[1, 0] * curGrad.Item1 + reversedGessian[1, 1] * curGrad.Item2));
+
+                    Console.WriteLine($"det(H^-1(xk)) > 0 \n-------");
+                }
+                else
+                {
+                    d = (-curGrad.Item1, 
+                         -curGrad.Item2);
+                    flag = true;
+
+                    Console.WriteLine($"det(H^-1(xk)) <= 0 \n-------");
+                }
+
+                Console.WriteLine($"d^k: ({Math.Round(d.Item1, 4)}; {Math.Round(d.Item2, 4)})\n-------");
+
+                if (flag == false)
+                {
+                    step = 1;
+                  
+                    nextP = (currentP.Item1 + step * d.Item1,
+                             currentP.Item2 + step * d.Item2);
+                }
+                else
+                {
+                    nextP = (currentP.Item1 + step * d.Item1,
+                             currentP.Item2 + step * d.Item2);
+
+                    while(F(nextP) >= F(currentP))
                     {
-                        Console.WriteLine("Оптимальное значение найдено.");
-                        Console.WriteLine($"x* = ({newX[0]}, {newX[1]})");
-                        break;
+                        step /= 2;
+
+                        nextP = (currentP.Item1 + step * d.Item1,
+                                 currentP.Item2 + step * d.Item2);
                     }
-                    else
-                    {
-                        x = newX; // Переходим к новой точке
-                        k++;
-                        Console.WriteLine($"Итерация {k}:");
-                        PrintVariables(a, b, c, E1, E2, M, k, x);
-                    }
+                }
+
+                Console.WriteLine($"nextX: ({Math.Round(nextP.Item1, 4)}; {Math.Round(nextP.Item1, 4)})");
+
+                if (StopSearch(previousP, currentP, nextP, e2))
+                {
+                    return (nextP, k);
                 }
                 else
                 {
                     k++;
-                    Console.WriteLine($"Итерация {k}:");
-                    PrintVariables(a, b, c, E1, E2, M, k, x);
-                }
-            }
-            else
-            {
-                double[] dk = MultiplyScalarVector(-1, gradient); // Вычисляем d^k = -∇f(x^k)
-                Console.WriteLine($"Направление: ({dk[0]}, {dk[1]})");
-
-                double tk = 1; // Инициализируем шаг t_k
-
-                double[] newX = new double[x.Length];
-                for (int i = 0; i < x.Length; i++)
-                {
-                    newX[i] = x[i] + tk * dk[i]; // Находим новую точку x^(k+1)
-                }
-                Console.WriteLine($"Новая точка: ({newX[0]}, {newX[1]})");
-
-                if (Function(newX, a, b, c) < Function(x, a, b, c)) // Проверяем условие на улучшение
-                {
-                    if (Norm(newX) < E2 || Math.Abs(Function(newX, a, b, c) - Function(x, a, b, c)) < E2) // Проверяем условие на точность
-                    {
-                        Console.WriteLine("Оптимальное значение найдено.");
-                        Console.WriteLine($"x* = ({newX[0]}, {newX[1]})");
-                        break;
-                    }
-                    else
-                    {
-                        x = newX; // Переходим к новой точке
-                        k++;
-                        Console.WriteLine($"Итерация {k}:");
-                        PrintVariables(a, b, c, E1, E2, M, k, x);
-                    }
-                }
-                else
-                {
-                    k++;
-                    Console.WriteLine($"Итерация {k}:");
-                    PrintVariables(a, b, c, E1, E2, M, k, x);
+                    previousP = currentP;
+                    currentP = nextP;
                 }
             }
         }
-    }
 
-    static void PrintVariables(double a, double b, double c, double E1, double E2, int M, int k, double[] x)
-    {
-        Console.WriteLine($"\na = {a}, b = {b}, c = {c}");
-        Console.WriteLine($"E1 = {E1}, E2 = {E2}, M = {M}");
-        Console.WriteLine($"k = {k}");
-        Console.WriteLine($"x = ({x[0]}, {x[1]})");
-    }
-
-    static double Function(double[] x, double a, double b, double c)
-    {
-        return a * Math.Pow(x[0], 2) + b * x[0] * x[1] + c * Math.Pow(x[1], 2); // Функция ax1^2 + bx1x2 + cx2^2
-    }
-
-
-    static double[] Gradient(double[] x, double a, double b, double c)
-    {
-        double[] gradient = new double[2];
-        gradient[0] = a * 2 * x[0] + b * x[1];
-        gradient[1] = b * x[0] + 2 * c * x[1];
-        return gradient;
-    }
-
-    static double[,] HessianMatrix(double a, double b, double c)
-    {
-        return new double[,] { { a * 2, b }, { b, c * 2 } };
-    }
-
-    static double[,] InverseMatrix(double[,] matrix)
-    {
-        double det = matrix[0, 0] * matrix[1, 1] - matrix[0, 1] * matrix[1, 0];
-        double[,] inverse = new double[,] { { matrix[1, 1] / det, -matrix[0, 1] / det }, { -matrix[1, 0] / det, matrix[0, 0] / det } };
-        return inverse;
-    }
-
-    static bool IsPositiveDefinite(double[,] matrix)
-    {
-        return matrix[0, 0] > 0 && matrix[1, 1] > 0 && (matrix[0, 0] * matrix[1, 1] - matrix[0, 1] * matrix[1, 0]) > 0;
-    }
-
-    static double Norm(double[] vector)
-    {
-        return Math.Sqrt(Math.Pow(vector[0], 2) + Math.Pow(vector[1], 2));
-    }
-
-    static double[] MultiplyMatrixVector(double[,] matrix, double[] vector)
-    {
-        double[] result = new double[matrix.GetLength(0)];
-        for (int i = 0; i < matrix.GetLength(0); i++)
+        static void Main()
         {
-            double sum = 0;
-            for (int j = 0; j < matrix.GetLength(1); j++)
-            {
-                sum += matrix[i, j] * vector[j];
-            }
-            result[i] = sum;
-        }
-        return result;
-    }
+            /* Console.WriteLine("Enter x1 and x2 for starting point\nx0 = (x1; x2);");
+             Console.WriteLine("x1:");
+             var x0_1 = Double.Parse(Console.ReadLine());
+             Console.WriteLine("x2:");
+             var x0_2 = Double.Parse(Console.ReadLine());
+             var x0 = (x0_1, x0_2);
+             Console.WriteLine("Enter first epsilon:");
+             var e1 = Double.Parse(Console.ReadLine());
+             Console.WriteLine("Enter second epsilon:");
+             var e2 = Double.Parse(Console.ReadLine());
+             int M = 10;*/
 
-    static double[] MultiplyScalarVector(double scalar, double[] vector)
-    {
-        double[] result = new double[vector.Length];
-        for (int i = 0; i < vector.Length; i++)
-        {
-            result[i] = scalar * vector[i];
+            var x0 = (1.5, 0.5);
+            var e1 = 0.15;
+            var e2 = 0.2;
+            int M = 10;
+
+            Console.Clear();
+
+            Console.WriteLine("Enter a, b, c for equation\nax1^2 + bx1x2 + cx2^2");
+            a = Double.Parse(Console.ReadLine());
+            b = Double.Parse(Console.ReadLine());
+            c = Double.Parse(Console.ReadLine());
+
+            var result = Method(x0, e1, e2, M);
+            Console.WriteLine($"Result:\nx = ({Math.Round(result.Item1.Item1, 4)}; {Math.Round(result.Item1.Item2, 4)})\nf(x) = {Math.Round(F(result.Item1), 4)}\nk = {result.Item2}");
         }
-        return result;
     }
 }
